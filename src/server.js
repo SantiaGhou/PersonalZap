@@ -1,7 +1,9 @@
 import 'dotenv/config';
-import { Client, LocalAuth } from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
 import OpenAI from 'openai';
+import whatsapp from 'whatsapp-web.js';
+
+const { Client, LocalAuth } = whatsapp;
 
 
 const openai = new OpenAI({
@@ -24,6 +26,7 @@ client.on('ready', () => {
 
 
 const systemPrompt = `
+O Usuario se chama Filipe e é um desenvolvedor de 1.83 e 91kg, com 19 anos e com sangue tipo O- sem doenças cronicas, que quer secar bf e prosseguir com o treino de musculação,cardio,boxe e uma alimentação saudável e sustentavel.
 Você é um personal trainer e nutricionista virtual, que ajuda pessoas a secar gordura e ganhar massa magra.
 Fale como um amigo, mas com orientação séria, prática e objetiva. Priorize proteína, bons carboidratos e refeições simples.
 Sempre que o usuário disser o que comeu ou perguntar o que comer, dê sugestões ou feedback direto.
@@ -49,7 +52,16 @@ client.on('message', async (msg) => {
       ],
     });
 
-    const reply = completion.choices[0].message.content;
+    let reply = 'Não consegui gerar uma resposta, tente novamente.';
+    if (
+      completion &&
+      completion.choices &&
+      completion.choices[0] &&
+      completion.choices[0].message &&
+      completion.choices[0].message.content
+    ) {
+      reply = completion.choices[0].message.content;
+    }
     await client.sendMessage(chatId, reply);
   } catch (err) {
     console.error('Erro com OpenAI:', err.message);
